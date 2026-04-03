@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circular Gantt Chart</title>
+    <script src="https://code.jscharting.com/latest/jscharting.js"></script>
+    <script src="https://code.jscharting.com/latest/modules/types.js"></script>
+    
+    <style>
+        #chartDiv {
+            width: 100%;
+            max-width: 700px;
+            height: 750px; /* Increased slightly for legend space */
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="chartDiv"></div>
+
+    <script type="text/javascript">
+        var colorByName = {
+            'Sleep': '#1B263B',
+            'Work': '#2A9D8F',
+            'Night routine': '#415A77', 
+            'Morning routine': '#FFE745',
+            'Lunch': '#F5B058',
+            'Coffee break': '#7B5E57',
+            'Dinner': '#853C39',
+            'Personal time': '#006EB3'
+        };
+
+        var chartOptions = {
+            debug: true,
+            margin: { bottom: 40, top: 20 }, // Added margin
+            title: {
+                position: 'center',
+                label: {
+                    text: 'My time table',
+                    style_fontSize: 18
+                }
+            },
+            legend: {
+                position: 'bottom', // Changed from 'inside bottom'
+                template: '%icon %name',
+                maxColumns: 4 // Cleaner layout
+            },
+            xAxis: {
+                defaultTick_gridLine_width: 0,
+                spacingPercentage: 0.1
+            },
+            yAxis: {
+                formatString: 'n0',
+                line_width: 0,
+                defaultTick: {
+                    padding: 5,
+                    line: { width: 2, length: 4, color: '#aaa69d' },
+                    label_style: {
+                        fontSize: 15,
+                        color: '#9c9890',
+                        fontWeight: 'bold'
+                    }
+                },
+                scale: { range: [0, 24], interval: 1 }
+            },
+            defaultSeries: {
+                legendEntry_visible: false,
+                defaultPoint: {
+                    tooltip: tooltipFormatter,
+                    legendEntry_visible: false
+                },
+                angle: { start: -90, sweep: 360 },
+                type: 'gauge column',
+                shape_label: {
+                    text: '%name',
+                    style: { fontSize: 34, color: '#9c9890' },
+                    verticalAlign: 'middle'
+                }
+            },
+            series: [
+                {
+                    name: '',
+                    points: [
+                        { name: 'Sleep', x: 'am', y: [0, 7] },
+                        { name: 'Morning routine', x: 'am', y: [7, 9] },
+                        //{ name: 'Exercise', x: 'am', y: [7.5, 8] },
+                        //{ name: 'Getting ready for work', x: 'am', y: [8.5, 9] },
+                        { name: 'Work', x: 'am', y: [9, 12] },
+                        { name: 'Lunch', x: 'am', y: [12, 13] },
+                        { name: 'Work', x: 'am', y: [13, 15] },
+                        { name: 'Coffee break', x: 'am', y: [15, 15.5] },
+                        { name: 'Work', x: 'am', y: [15.5, 18] },
+                        { name: 'Dinner', x: 'am', y: [18, 20] },
+                        { name: 'Personal time', x: 'am', y: [20, 23] },
+                        { name: 'Night routine', x: 'am', y: [23, 24] },
+                    ]
+                },
+            ]
+        };
+
+        chartOptions.series.forEach(function(s) {
+            s.points.forEach(function(p) {
+                p.color = colorByName[p.name];
+            });
+        });
+
+        chartOptions.legend.customEntries = Object.keys(colorByName).map(function(k) {
+            return { name: k, icon_color: colorByName[k] };
+        });
+
+        var chart = JSC.chart('chartDiv', chartOptions);
+
+        function tooltipFormatter(point) {
+            var val = point.tokenValue('%yRange');
+            var formatSpan = function(v) {
+                var twoDigit = function(v) {
+                    return ('0' + v).slice(-2);
+                };
+                var hour = Math.floor(v) % 12,
+                    min = Math.floor((v % 1) * 60);
+                return ((hour || 12) + ' hr ' + twoDigit(min) + ' min').replace('00 min', '').trim();
+            };
+            return point.tokenValue('%name') + ' ' + formatSpan(val);
+        }
+    </script>
+</body>
+</html>
